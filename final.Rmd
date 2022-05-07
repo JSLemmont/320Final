@@ -1,0 +1,72 @@
+---
+title: "Final"
+author: "Nik Pearce"
+date: "5/5/2022"
+output: html_document
+For my project I decided to analyze crude oil prices compared to gas prices.
+I compared crude oil prices per barrel, to diesel prices per gallon, to
+regular prices per gallon.
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("tidyverse")
+library("lubridate")
+library("tidyverse")
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r read gas}
+gas_prices <- read.csv('PET_PRI_GND_DCUS_NUS_W.csv')
+crude_price <- read.csv('crude-oil-price.csv')
+```
+
+```{r clean data}
+crude_price$date <- as.Date(crude_price$date, format = "%Y-%m-%dT00:00:00")
+crude_price <- crude_price %>% mutate(date = ymd(date),
+                                      year = year(date)) %>%
+  group_by(year) %>%
+  arrange(date) %>%
+  filter(row_number()==1) %>%
+  filter(year > 1994)
+gas_prices$Date <- as.Date(gas_prices$Date, format = "%m/%d/%Y")
+gas_prices <- gas_prices %>% mutate(Date = ymd(Date),
+                      year = year(Date)) %>%
+  group_by(year) %>%
+  arrange(Date) %>%
+  filter(row_number()== 1)
+
+```
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+crude_price %>%
+  ggplot(aes(x = date,
+             y = price)) +
+  geom_point() +
+  ggtitle("Crude oil price per barrel") +
+  ylab("Price ($)")
+gas_prices %>%
+  ggplot(aes(x = Date,
+             y = R1)) +
+  geom_point() +
+  ggtitle("Regular gas prices per gallon") + 
+  ylab("Price ($)")
+gas_prices %>%
+  ggplot(aes(x = Date,
+         y = D1)) +
+  geom_point() +
+  ggtitle("Diesel gas prices per gallon") +
+  ylab("Price ($)")
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
